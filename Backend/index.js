@@ -3,15 +3,18 @@ import dotenv from 'dotenv'
 import mongoose from 'mongoose'
 import { v2 as cloudinary } from 'cloudinary';
 import fileUpload from 'express-fileupload';
+import cookieParser from 'cookie-parser';
 
 import courseRoute from './routes/course.route.js'
 import userRoute from './routes/user.route.js'
+import adminRoute from './routes/admin.route.js'
 
 const app = express()
 dotenv.config()
 
 // middleware
 app.use(express.json())
+app.use(cookieParser())
 app.use(fileUpload({
     useTempFiles : true,
     tempFileDir : '/tmp/'
@@ -32,6 +35,7 @@ try{
 // defining routes
 app.use("/api/v1/course", courseRoute)
 app.use("/api/v1/user", userRoute)
+app.use("/api/v1/admin", adminRoute)
 
 // Cloudinary cofiguration code
 cloudinary.config({ 

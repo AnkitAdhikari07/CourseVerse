@@ -4,6 +4,9 @@ import { Purchase } from "../models/purchase.model.js";
 
 
 export const createCourse = async(req, res) =>{
+
+    const adminId=req.adminId
+
     const {title, description, price} = req.body
     console.log(title, description, price)
 
@@ -38,6 +41,7 @@ export const createCourse = async(req, res) =>{
                 public_id: cloud_response.public_id,
                 url: cloud_response.url
             },
+            creatorId:adminId
         }
 
         const course = await Course.create(courseData)
@@ -55,12 +59,22 @@ export const createCourse = async(req, res) =>{
 
 
 export const updateCourse = async(req, res) =>{
+
+    const adminId=req.adminId
+
     const {courseId} = req.params;
     const {title, description, price, image} = req.body;
 
     try{
+
+        const courseSearch = await Course.findById(courseId)
+        if(!courseSearch){
+            return res.status(404).json({errors: "Course not found"})
+        }
+        
         const course = await Course.updateOne({
-            _id:courseId
+            _id:courseId,
+            creatorId: adminId,
         },{
             title, 
             description,
@@ -71,7 +85,7 @@ export const updateCourse = async(req, res) =>{
             }
         })
 
-        res.status(201).json({message: "Course updated Successfully"})
+        res.status(201).json({message: "Course updated Successfully", course})
     }   
     catch(error){
         res.status(500).json({errors:"Error in course updating"})
@@ -82,10 +96,14 @@ export const updateCourse = async(req, res) =>{
 
 
 export const deleteCourse = async(req, res) =>{
+
+    const adminId=req.adminId
+
     const {courseId} = req.params
     try{
         const course = await Course.findOneAndDelete({
             _id:courseId,
+            creatorId: adminId,
         })
         if(!course){
             return res.status(404).json({error:"Course not found"})
